@@ -1,0 +1,22 @@
+{
+  "name": "chatgpt-token-cli",
+  "version": "1.0.0",
+  "description": "Terminal tool that signs in with ChatGPT (dynamic client PKCE flow) and prints the Bearer access token",
+  "type": "module",
+  "bin": {
+    "chatgpt-token": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "node src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.6.0"
+  },
+  "license": "MIT"
+}
