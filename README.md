@@ -100,7 +100,15 @@ waits at most 5 minutes before giving up.
 ```bash
 npm run typecheck   # tsc --noEmit
 npm test            # node --test (PKCE, URL builder, callback server, token exchange)
+npm run test:agent  # live Agents SDK smoke test using OPENAI_ACCESS_TOKEN and OPENAI_MODEL from .env
 ```
+
+The Agents SDK smoke test requires credentials saved with `s` in the CLI.
+It makes one streamed agent call with `store: false`, disables tracing, and
+checks that the final answer is `OK`. It uses your account's model allowance
+and is separate from the local test suite. If `OPENAI_MODEL` is unset, it
+selects the first visible model from your account's catalog. SDK dependencies
+are dev-only.
 
 Testing hooks (never needed in normal use):
 

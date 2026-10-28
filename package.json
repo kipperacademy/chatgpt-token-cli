@@ -9,14 +9,18 @@
   "scripts": {
     "start": "node src/index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "node --test test/"
+    "test": "node --test test/",
+    "test:agent": "node --env-file-if-exists=.env test-agent-sdk.ts"
   },
   "engines": {
     "node": ">=22.6"
   },
   "devDependencies": {
+    "@openai/agents": "^0.21.0",
     "@types/node": "^24.0.0",
-    "typescript": "^5.6.0"
+    "openai": "^7.45.1",
+    "typescript": "^5.6.0",
+    "zod": "^4.6.7"
   },
   "license": "MIT"
 }
