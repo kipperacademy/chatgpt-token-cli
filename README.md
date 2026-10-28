@@ -27,11 +27,48 @@ Flow:
    not open, the URL is printed so you can paste it.
 3. After you approve, the browser shows a confirmation page and the terminal
    exchanges the code for tokens.
-4. The terminal shows granted scopes, expiry and the access token, then offers:
+4. The terminal shows granted scopes, expiry and the access token, then
+   fetches `GET /v1/models` with the token and lists the models this
+   account can actually use (slug, name, context window, reasoning levels).
+5. Actions:
    - `c` copy the access token to the clipboard
-   - `s` save credentials to `~/.chatgpt-cli/credentials.json` and append
-     `OPENAI_ACCESS_TOKEN` / `OPENAI_REFRESH_TOKEN` to `./.env`
+   - `s` save credentials to `~/.chatgpt-cli/credentials.json` (including
+     the model slugs) and write `OPENAI_ACCESS_TOKEN`,
+     `OPENAI_REFRESH_TOKEN` and `OPENAI_MODEL` to `./.env`
+   - `m` re-list models, toggling hidden ones (`visibility != "list"`)
+   - `t` test a model: sends the minimal streaming request below and prints
+     the reply
    - `q` exit
+
+## Using the token
+
+This is a **ChatGPT plan token, not an API key**. It is accepted by
+`https://api.openai.com/v1` but only under the Sign in with ChatGPT rules:
+
+- Only models returned by `GET /v1/models` for this account work. Public
+  model names such as `gpt-4o` or `gpt-5` return
+  `400 model_not_found: "The '<model>' model is not supported when using Codex
+  with a ChatGPT account."` The catalog changes over time, so always read it
+  from the endpoint instead of hardcoding slugs.
+- `POST /v1/responses` must send `input` as a list of messages, `store: false`
+  and `stream: true`. Omit `temperature`, `top_p`, `max_output_tokens`,
+  `metadata`, `user`, `previous_response_id` and system-role messages; put
+  system guidance in `instructions`.
+- Treat the request as successful only after a `response.completed` event.
+
+Minimal working call:
+
+```bash
+curl -s -N https://api.openai.com/v1/responses \
+  -H "Authorization: Bearer $OPENAI_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-6-luna",
+    "store": false,
+    "stream": true,
+    "input": [{"role":"user","content":[{"type":"input_text","text":"Reply with the single word OK."}]}]
+  }'
+```
 
 ## Files on disk
 
@@ -69,6 +106,7 @@ Testing hooks (never needed in normal use):
 
 - `CHATGPT_CLI_NO_BROWSER=1` skips launching a browser.
 - `CHATGPT_TOKEN_ENDPOINT_OVERRIDE=<url>` points the token exchange at a mock.
+- `CHATGPT_API_BASE_OVERRIDE=<url>` points `/models` and `/responses` at a mock.
 
 ## Layout
 
@@ -76,10 +114,12 @@ Testing hooks (never needed in normal use):
 src/
   index.ts   entry point: screens, action menu, error handling
   auth.ts    authorization URL, loopback callback server, token exchange
+  models.ts  GET /v1/models catalog and minimal streaming test request
   pkce.ts    PKCE verifier/challenge, state, persistent host id
   system.ts  open browser, copy to clipboard (macOS / Linux / Windows)
   ui.ts      banner, colors, spinner, key input
   config.ts  endpoints, port, scopes
 test/
   auth.test.ts
+  models.test.ts
 ```

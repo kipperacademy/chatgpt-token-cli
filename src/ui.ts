@@ -23,6 +23,11 @@ export function waitForEnter(prompt: string): Promise<void> {
   return new Promise((resolve) => rl.question(prompt, () => { rl.close(); resolve(); }));
 }
 
+export function readLine(prompt: string): Promise<string> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => rl.question(prompt, (line) => { rl.close(); resolve(line); }));
+}
+
 /** Read a single keypress (lowercased). Falls back to line input when stdin is not a TTY. */
 export function readKey(): Promise<string> {
   const stdin = process.stdin;
